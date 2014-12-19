@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>PHP utils</title>
+    </head>
+    <body>
+        <?php if (isset($error)): ?>
+        <fieldset>
+            <legend>Error</legend>
+            <?=var_export($error, true)?>
+        </fieldset>
+        <?php endif; ?>
+        <form method="POST">
+            <select name="action">
+                <?php foreach (Action::$whitelist as $option): ?>
+                <option<?=$action == $option ? " selected": ''?>><?=$option?></option>
+                <?php endforeach; ?>
+            </select>
+                <textarea name="data"><?=$data?></textarea>
+            <input type="submit" value="Go" />
+        </form>
+        <?php if (isset($value)): ?>
+        <fieldset>
+            <legend>Result</legend>
+            <?=var_export($value, true)?>
+        </fieldset>
+        <?php endif; ?>
+    </body>
+</html>
