@@ -23,7 +23,7 @@ class Action
             return $action($data);
         }
 
-        throw Exception('Action not found');
+        throw new Exception('Action not found');
     }
 
     public static function isWhitelisted($action)
