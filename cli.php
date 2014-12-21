@@ -16,8 +16,13 @@ if (count($argv) > 2) {
 }
 
 if (count($argv) == 1) {
+    readline_info('readline_name', 'action');
+    readline_read_history('/tmp/phputils-action-history');
+    // TODO
+    //readline_completion_function();
     do {
         $action = readline("action > ");
+        readline_add_history($action);
         if ($action == '?') {
             echo implode("\n", Action::$whitelist);
         }
@@ -26,10 +31,11 @@ if (count($argv) == 1) {
     $action = array_pop($argv);
 }
 
-if ($action == 'quit') {
+if (!$action || $action == 'q' || $action == 'quit') {
     exit(0);
 }
 
+readline_info('readline_name', 'data');
 $data = readline("data > ");
 
 try {
