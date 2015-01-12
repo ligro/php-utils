@@ -5,6 +5,7 @@ class Action
     public static $whitelist = [
         'strlen',
         'json_decode',
+        'unserialize',
         'urlencode',
         'urldecode',
     ];
