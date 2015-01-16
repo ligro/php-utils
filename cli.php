@@ -15,28 +15,6 @@ if (count($argv) > 2) {
     exit (1);
 }
 
-function getAction()
-{
-    do {
-        $action = readline("action > ");
-        if ($action === '') {
-            echo implode("\n", Action::$whitelist), "\n\n";
-
-        } else if (in_array($action, ['q', 'quit'])) {
-            return false;
-
-        } else if ($action) {
-            readline_add_history($action);
-            if (!Action::check($action)) {
-                echo "Action not found\n";
-                $action = '';
-            }
-        }
-    } while ($action === '');
-
-    return $action;
-}
-
 function getData()
 {
     return readline("data > ");
@@ -59,14 +37,45 @@ if (count($argv) > 1) {
     exit(0);
 }
 
+function getAction()
+{
+    do {
+        $action = readline("action > ");
+        if ($action === false) {
+            break;
+        }
+
+        $action = trim($action);
+        if ($action === '') {
+            echo implode("\n", Action::$whitelist), "\n\n";
+
+        } else if (in_array($action, ['q', 'quit'])) {
+            return false;
+
+        } else if ($action) {
+            readline_add_history($action);
+            if (!Action::isWhitelisted($action)) {
+                echo "Action not found\n";
+                $action = '';
+            }
+        }
+    } while ($action === '');
+
+    return $action;
+}
+
+function readlineCompletion()
+{
+    return Action::$whitelist;
+}
+
 $readlineFile = '/tmp/phputils-action-history';
 
 // init read line
 readline_info('readline_name', 'action');
-is_file($readlineFile) and readline_read_history($readlineFile);
+readline_completion_function(readlineCompletion);
 
-// TODO
-//readline_completion_function();
+is_file($readlineFile) and readline_read_history($readlineFile);
 
 while (true) {
     $action = getAction();
