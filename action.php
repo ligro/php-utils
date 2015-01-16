@@ -28,6 +28,17 @@ class Action
         throw new Exception('Action not found');
     }
 
+    public static function check($action)
+    {
+        if (method_exists(__CLASS__, $action)) {
+            return true;
+        }
+
+        if (self::isWhitelisted($action)) {
+            return true;
+        }
+    }
+
     public static function isWhitelisted($action)
     {
         return in_array($action, self::$whitelist);
