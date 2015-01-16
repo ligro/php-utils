@@ -5,6 +5,7 @@ class Action
     public static $whitelist = [
         'strlen',
         'json_decode',
+        'json_decode_array',
         'unserialize',
         'urlencode',
         'urldecode',
@@ -32,6 +33,15 @@ class Action
         return in_array($action, self::$whitelist);
     }
 
+    public static function json_decode_array($data)
+    {
+        $value = json_decode($data, true);
+        if ($error = json_last_error()) {
+            throw new Exception($error);
+        }
+
+        return $value;
+    }
     public static function json_decode($data)
     {
         $value = json_decode($data);
