@@ -73,7 +73,7 @@ $readlineFile = '/tmp/phputils-action-history';
 
 // init read line
 readline_info('readline_name', 'action');
-readline_completion_function(readlineCompletion);
+readline_completion_function('readlineCompletion');
 
 is_file($readlineFile) and readline_read_history($readlineFile);
 
