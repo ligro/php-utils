@@ -3,87 +3,110 @@
 
 require_once __DIR__ . '/action.php';
 
-$usage = "{$argv[0]} [-h] [--help] action\n";
-
-if (isset($argv['-h']) || isset($argv['--help'])) {
-    echo $usage;
-    exit(1);
-}
-
-if (count($argv) > 2) {
-    echo "bad number of arguments.\n$usage";
-    exit (1);
-}
-
-function getData()
+class App
 {
-    return readline("data > ");
-}
+    protected static $_readlineFile;
 
-function run($action, $data)
-{
-    try {
-        $value = Action::run($action, $data);
-        var_export($value);
-        echo "\n";
+    public static function run($argv)
+    {
+        $usage = "{$argv[0]} [-h] [--help] action\n";
 
-    } catch (Exception $e) {
-        echo $e->getMessage(), "\n";
-    }
-}
-
-if (count($argv) > 1) {
-    run(array_pop($argv), getData());
-    exit(0);
-}
-
-function getAction()
-{
-    do {
-        $action = readline("action > ");
-        if ($action === false) {
-            break;
+        if (in_array('-h', $argv) || in_array('--help', $argv)) {
+            throw new Exception($usage, 1);
         }
 
-        $action = trim($action);
-        if ($action === '') {
-            echo implode("\n", Action::$whitelist), "\n\n";
+        if (count($argv) > 2) {
+            throw new Exception("bad number of arguments.\n$usage", 1);
+        }
 
-        } else if (in_array($action, ['q', 'quit'])) {
-            return false;
+        if (count($argv) > 1) {
+            self::_run(array_pop($argv), self::_getData());
+            return;
+        }
 
-        } else if ($action) {
-            readline_add_history($action);
-            if (!Action::isWhitelisted($action)) {
-                echo "Action not found\n";
-                $action = '';
+        self::_initCompletion();
+
+        while (true) {
+            $action = self::_getAction();
+            if ($action === false) {
+                break;
             }
+            self::_run($action, self::_getData());
         }
-    } while ($action === '');
 
-    return $action;
-}
-
-function readlineCompletion()
-{
-    return Action::$whitelist;
-}
-
-$readlineFile = '/tmp/phputils-action-history';
-
-// init read line
-readline_info('readline_name', 'action');
-readline_completion_function('readlineCompletion');
-
-is_file($readlineFile) and readline_read_history($readlineFile);
-
-while (true) {
-    $action = getAction();
-    if ($action === false) {
-        break;
+        self::_flushHistory();
     }
-    run($action, getData());
+
+    protected static function _run($action, $data)
+    {
+        try {
+            $value = Action::run($action, $data);
+            var_export($value);
+            echo "\n";
+
+        } catch (Exception $e) {
+            echo $e->getMessage(), "\n";
+        }
+    }
+
+    protected static function _getData()
+    {
+        // todo detect if we are reading from stdin or pipe
+        $data= readline("data > ");
+        readline_add_history($data);
+        return $data;
+    }
+
+    protected static function _getAction()
+    {
+        do {
+            $action = readline("action > ");
+            if ($action === false) {
+                break;
+            }
+
+            $action = trim($action);
+            if ($action === '') {
+                echo implode("\n", Action::$whitelist), "\n\n";
+
+            } else if (in_array($action, ['q', 'quit'])) {
+                return false;
+
+            } else if ($action) {
+                if (!Action::isWhitelisted($action)) {
+                    echo "Action not found\n";
+                    $action = '';
+                }
+            }
+        } while ($action === '');
+
+        return $action;
+    }
+
+    public static function readlineCompletion()
+    {
+        return Action::$whitelist;
+    }
+
+    protected static function _initCompletion()
+    {
+        self::$_readlineFile = sys_get_temp_dir() . '/phputils-data-history';
+
+        // init read line
+        readline_info('readline_name', 'data');
+        readline_completion_function('readlineCompletion');
+
+        is_file(self::$_readlineFile) and readline_read_history(self::$_readlineFile);
+    }
+
+    protected static function _flushHistory()
+    {
+        readline_write_history(self::$_readlineFile);
+    }
 }
 
-readline_write_history($readlineFile);
-
+try {
+    App::run($argv);
+} catch (Exception $e) {
+    exit($e->getCode());
+}
