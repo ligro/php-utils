@@ -9,6 +9,8 @@ class Action
         'unserialize',
         'urlencode',
         'urldecode',
+        'time2date',
+        'date2time',
     ];
 
     public static function run($action, $data)
@@ -43,6 +45,27 @@ class Action
     {
         $value = json_decode($data);
         self::_jsonError();
+        return $value;
+    }
+
+    public static function date2time($data)
+    {
+        $value = strtotime($data);
+        if (!$value) {
+            throw new Exception("Date $data not recognized");
+        }
+        return $value;
+    }
+
+    public static function time2date($data)
+    {
+        if (!is_numeric($data)) {
+            throw new Exception("$data is not a timestamp");
+        }
+        $value = date('Y-m-d H:i:s', $data);
+        if (!$value) {
+            throw new Exception("$data not recognized");
+        }
         return $value;
     }
 
