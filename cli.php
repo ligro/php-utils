@@ -94,7 +94,7 @@ class App
 
         // init read line
         readline_info('readline_name', 'data');
-        readline_completion_function([self, 'readlineCompletion']);
+        readline_completion_function([__CLASS__, 'readlineCompletion']);
 
         is_file(self::$_readlineFile) and readline_read_history(self::$_readlineFile);
     }
